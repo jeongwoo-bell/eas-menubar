@@ -6,12 +6,12 @@ macOS 메뉴바의 망치 아이콘을 누르면 지금 EAS에서 뭐가 빌드�
 🔨 28분                                         ← 메뉴바
 ────────────────────────────────────────────
 빌드 중 · preview
-🟠 Android · 4a141fc feat: 결제 화면 리뉴얼
+🟠 Android · a1b2c3d feat: 결제 화면 리뉴얼
       ▰▰▰▰▰▰▰▰▰▰▰▱   28분 경과 · 약 2분 남음
 최근
-🟢 iOS · 4a141fc feat: 결제 화면 리뉴얼 · 19분 전
-🟢 iOS · 32bb752 refactor: api client · 1일 전
-🟢 Android · 32bb752 refactor: api client · 1일 전
+🟢 iOS · a1b2c3d feat: 결제 화면 리뉴얼 · 19분 전
+🟢 iOS · 9f8e7d6 refactor: api client · 1일 전
+🟢 Android · 9f8e7d6 refactor: api client · 1일 전
 ────────────────────────────────────────────
 방금 갱신 · 빌드 중엔 15초마다
 새로고침
@@ -45,8 +45,8 @@ git clone https://github.com/jeongwoo-bell/eas-menubar.git && cd eas-menubar && 
 
 ```
   어떤 앱의 빌드를 메뉴바에 띄울까요?
- › ◉ Bell        ~/dev/bell-app
-   ◉ bell-admin  ~/dev/admin
+ › ◉ My App      ~/dev/my-app
+   ◉ My Admin    ~/dev/my-admin
    ◯ Legacy      ~/work/legacy-app
    ↑↓ 이동 · space 선택 · a 전체 · enter 완료   (2개 선택됨)
 ```
