@@ -269,16 +269,6 @@ function kickFetch() {
   spawn('/bin/bash', [SCRIPT, '--fetch'], { detached: true, stdio: 'ignore' }).unref();
 }
 
-// 같은 플랫폼·프로필의 최근 성공 빌드 평균 소요 시간
-function typicalDuration(b, all) {
-  const d = all
-    .filter((x) => x._project === b._project && x.platform === b.platform && x.profile === b.profile
-      && x.status === 'FINISHED' && x.completedAt)
-    .slice(0, 5)
-    .map((x) => ts(x.completedAt) - ts(x.createdAt));
-  return d.length ? d.reduce((a, c) => a + c, 0) / d.length : null;
-}
-
 // ───────────────────────── 그리기 ─────────────────────────
 function render() {
   const cfg = loadConfig();
@@ -339,11 +329,11 @@ function render() {
       if (!running.length && !done.length && !err) L('아직 빌드가 없어요 | color=gray size=12');
       if (running.length) {
         L(`빌드 중${tag} | size=11 color=gray`);
-        running.forEach((b) => drawBuild(b, pi, showProf, builds, L, act));
+        running.forEach((b) => drawBuild(b, pi, showProf, L, act));
       }
       if (done.length) {
         L(`최근${running.length ? '' : tag} | size=11 color=gray`);
-        done.forEach((b) => drawBuild(b, pi, showProf, builds, L, act));
+        done.forEach((b) => drawBuild(b, pi, showProf, L, act));
       }
       if (err) drawError(err, L, act);
       if (multi && pi < cfg.projects.length - 1) L('---');
@@ -354,9 +344,8 @@ function render() {
   L('---');
   if (cache && cfg.projects.length) {
     const failing = errors.length && cache.okAt < cache.checkedAt;
-    const checking = lockFresh() ? ' · 확인 중…' : '';
-    if (failing && cache.okAt) L(`갱신 실패 · ${ago(cache.okAt)} 받은 정보를 보여주는 중${checking} | size=11 color=${COLOR.red}`);
-    else L(`${ago(cache.okAt)} 갱신${checking}${active.length ? ' · 빌드 중엔 15초마다' : ''} | size=11 color=gray`);
+    if (failing && cache.okAt) L(`갱신 실패 · ${ago(cache.okAt)} 받은 정보를 보여주는 중 | size=11 color=${COLOR.red}`);
+    else L(`${ago(cache.okAt)} 갱신 | size=11 color=gray`);
   }
   L(`새로고침 | sfimage=arrow.clockwise ${act(['--fetch'])}`);
   const one = cfg.projects.length === 1 && builds[0];
@@ -366,7 +355,7 @@ function render() {
   process.stdout.write(out.join('\n') + '\n');
 }
 
-function drawBuild(b, pi, showProf, all, L, act) {
+function drawBuild(b, pi, showProf, L, act) {
   const st = STATUS[b.status] || { sf: 'circle', color: COLOR.gray };
   const isActive = ACTIVE.has(b.status);
   const commit = (b.commit || '').slice(0, 7);
@@ -374,24 +363,14 @@ function drawBuild(b, pi, showProf, all, L, act) {
   const parts = [platLabel(b), showProf && profLabel(b), [commit, msg].filter(Boolean).join(' ')]
     .filter(Boolean);
   if (!isActive) parts.push(ago(b.completedAt || b.updatedAt));
+  else if (b.status === 'IN_PROGRESS') parts.push(`${dur(now() - ts(b.createdAt))} 경과`);
   const url = buildPage(b);
   L(`${clean(parts.join('  ·  '))} | sfimage=${st.sf} sfcolor=${st.color} href=${url} symbolize=false`);
 
-  // 진행 중인 빌드는 한 줄 더: 진행률 바 + 남은 시간
-  if (isActive) {
+  // 대기·취소 중인 빌드는 한 줄 더: 상태
+  if (isActive && b.status !== 'IN_PROGRESS') {
     let line;
-    if (b.status === 'IN_PROGRESS') {
-      const el = now() - ts(b.createdAt);
-      const avg = typicalDuration(b, all);
-      if (avg) {
-        const r = el / avg;
-        const n = Math.max(1, Math.min(r < 1 ? 11 : 12, Math.round(r * 12))); // 끝나기 전엔 꽉 채우지 않음
-        const eta = r < 1 ? `약 ${Math.max(1, Math.ceil((avg - el) / 60000))}분 남음` : `평소보다 ${dur(el - avg)} 더 걸리는 중`;
-        line = `${'▰'.repeat(n)}${'▱'.repeat(12 - n)}   ${dur(el)} 경과 · ${eta}`;
-      } else {
-        line = `${dur(el)} 경과 · 진행 중`;
-      }
-    } else if (b.status === 'PENDING_CANCEL') {
+    if (b.status === 'PENDING_CANCEL') {
       line = '취소하는 중…';
     } else {
       const pos = b.queuePosition ? `대기열 ${b.queuePosition}번째` : '대기 중';
