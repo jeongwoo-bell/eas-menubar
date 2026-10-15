@@ -10,6 +10,7 @@ RAW="https://raw.githubusercontent.com/$REPO/$BRANCH"
 PLUGIN_FILE="eas-builds.30s.sh"
 
 bold=$'\033[1m'; dim=$'\033[2m'; green=$'\033[32m'; red=$'\033[31m'; reset=$'\033[0m'
+TILDE="~"
 ok()   { echo "${green}✔${reset} $*"; }
 die()  { echo "${red}✖${reset} $*" >&2; exit 1; }
 
@@ -39,7 +40,7 @@ if [ -z "$PLUGIN_DIR" ]; then
   defaults write com.ameba.SwiftBar PluginDirectory -string "$PLUGIN_DIR"
 fi
 mkdir -p "$PLUGIN_DIR"
-ok "플러그인 폴더: ${PLUGIN_DIR/#$HOME/\~}"
+ok "플러그인 폴더: ${PLUGIN_DIR/#$HOME/$TILDE}"
 
 # 3. 플러그인 파일 (clone한 폴더에서 실행했으면 그 파일, 아니면 GitHub에서 받기)
 #    curl | bash 로 실행하면 BASH_SOURCE가 파일이 아니므로 현재 폴더의 파일을 잘못 집지 않도록 확인
@@ -65,7 +66,7 @@ else
 fi
 chmod +x "$TARGET"
 rm -rf "$HOME/.cache/swiftbar-eas"   # v1 캐시 정리
-ok "플러그인 설치: ${TARGET/#$HOME/\~}"
+ok "플러그인 설치: ${TARGET/#$HOME/$TILDE}"
 
 # 4. 터미널 명령 eas-builds
 BIN_DIR=""
