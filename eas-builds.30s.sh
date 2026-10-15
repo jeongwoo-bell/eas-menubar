@@ -307,7 +307,8 @@ function render() {
   if (!cfg.projects.length || (!cache && !blocking)) L(' | sfimage=hammer');
   else if (active.length === 1) {
     const b = active[0];
-    L(`${platLabel(b)} ${b.status === 'IN_PROGRESS' ? dur(now() - ts(b.createdAt)) : '대기'} | sfimage=hammer.fill`);
+    // 메뉴바 폭을 줄이려고 경과 시간만 (플랫폼은 드롭다운에 있음)
+    L(`${b.status === 'IN_PROGRESS' ? dur(now() - ts(b.createdAt)) : '대기'} | sfimage=hammer.fill`);
   } else if (active.length > 1) L(`${active.length} | sfimage=hammer.fill`);
   else if (blocking) L(' | sfimage=exclamationmark.triangle');
   else if (lastDone?.status === 'ERRORED' && since < 60 * 60e3) L(` | sfimage=xmark.circle.fill sfcolor=${COLOR.red}`);
